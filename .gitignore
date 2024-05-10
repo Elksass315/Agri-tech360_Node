@@ -1,4 +1,6 @@
 node_modules
 package-lock.json
 uploads
-.\model\AI-model\*
+model/AI-model/plant_model_v2.h5
+model/AI-model/sentiment.h5
+model/AI-model/soil_model.h5
