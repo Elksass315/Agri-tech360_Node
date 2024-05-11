@@ -7,7 +7,8 @@ const weather = require("./routes/weather");
 const product = require("./routes/products");
 const favorite = require("./routes/favorites");
 const plant = require("./routes/plants");
-const AI = require("./routes/AI")
+// TODO: Witing for https://github.com/tensorflow/tfjs/issues/8261 to Fix the tf issue
+//const AI = require("./routes/AI")
 
 if (!config.get("jwtPrivateKey")) {
     console.error("FATAL ERROR: jwtPrivateKey is not defined.");
@@ -30,7 +31,7 @@ app.use("/api/weather", weather)
 app.use("/api/product", product)
 app.use("/api/favorite", favorite)
 app.use("/api/plant", plant)
-app.use("/api/ai", AI);
+//app.use("/api/ai", AI);
 
 app.get("/", (req, res) => {
     res.send(`Welcome to Agri-Tech360`)
