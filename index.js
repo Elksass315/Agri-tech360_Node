@@ -17,11 +17,11 @@ if (!config.get("jwtPrivateKey")) {
 const app = express();
 
 mongoose.connect(`mongodb://localhost:27017/agri-tech360`)
-    .then(() => console.log("connecting to data base"))
+    .then(() => console.log("connecting to Database"))
     .catch(err => console.log(err));
 
 app.use(express.json());
-app.use(express.urlencoded());
+//app.use(express.urlencoded());
 app.use(express.static('./uploads'));
 
 app.use("/api/users", users)

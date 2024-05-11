@@ -26,3 +26,5 @@ router.post('/disease', upload.single('image') ,async (req, res) => {
 
     res.send(predictions);
 });
+
+module.exports = router;
