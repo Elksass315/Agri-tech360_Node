@@ -7,12 +7,12 @@ const isAdmin = require('../middleware/admin');
 
 
 router.get('/', async (req, res) => {
-    const plants = await plant.find();
+    const plants = await Plant.find();
     res.send(plants);
 });
 
 router.get('/:id', async (req, res) => {
-    const plants = await plant.findById(req.params.id);
+    const plants = await Plant.findById(req.params.id);
     if (!plants) return res.status(404).send('The plant with the given ID was not found.');
     res.send(plants);
 }); 
