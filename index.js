@@ -1,10 +1,10 @@
 const winston = require("winston")
 const express = require("express");
-const mongoose = require("mongoose");
 const config = require("config");
 const app = express();
 
 require("./startup/routes")(app);
+require("./startup/DB")();
 
 winston.handleExceptions(new winston.transports.File({filename: config.get("logFile")}))
 winston.add(winston.transports.File, {filename: config.get("logFile")})
@@ -18,10 +18,6 @@ if (!config.get("jwtPrivateKey")) {
     process.exit(1);
 }
 
-
-mongoose.connect(`mongodb://localhost:27017/agri-tech360`)
-    .then(() => console.log("connecting to Database"))
-    .catch(err => console.log(err));
 
 
 app.get("/", (req, res) => {
