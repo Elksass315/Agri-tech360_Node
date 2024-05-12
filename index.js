@@ -1,3 +1,4 @@
+const winston = require("winston")
 const express = require("express");
 const mongoose = require("mongoose");
 const config = require("config");
@@ -7,8 +8,16 @@ const weather = require("./routes/weather");
 const product = require("./routes/products");
 const favorite = require("./routes/favorites");
 const plant = require("./routes/plants");
-// TODO: Witing for https://github.com/tensorflow/tfjs/issues/8261 to Fix the tf issue
+// TODO: Waiting for https://github.com/tensorflowyg/tfjs/issues/8261 to Fix the tf issue
 //const AI = require("./routes/AI")
+const errorMiddleware = require("./middleware/error")
+
+winston.handleExceptions(new winston.transports.File({filename: config.get("logFile")}))
+winston.add(winston.transports.File, {filename: config.get("logFile")})
+
+process.on("unhandledRejection", (ex) => {
+    throw ex;
+});
 
 if (!config.get("jwtPrivateKey")) {
     console.error("FATAL ERROR: jwtPrivateKey is not defined.");
@@ -32,6 +41,7 @@ app.use("/api/product", product)
 app.use("/api/favorite", favorite)
 app.use("/api/plant", plant)
 //app.use("/api/ai", AI);
+app.use(errorMiddleware)
 
 app.get("/", (req, res) => {
     res.send(`Welcome to Agri-Tech360`)
