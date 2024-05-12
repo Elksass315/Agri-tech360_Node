@@ -3,22 +3,14 @@ const express = require("express");
 const config = require("config");
 const app = express();
 
+require("./startup/logging")();
 require("./startup/routes")(app);
 require("./startup/DB")();
-
-winston.handleExceptions(new winston.transports.File({filename: config.get("logFile")}))
-winston.add(winston.transports.File, {filename: config.get("logFile")})
-
-process.on("unhandledRejection", (ex) => {
-    throw ex;
-});
 
 if (!config.get("jwtPrivateKey")) {
     console.error("FATAL ERROR: jwtPrivateKey is not defined.");
     process.exit(1);
 }
-
-
 
 app.get("/", (req, res) => {
     res.send(`Welcome to Agri-Tech360`)
