@@ -17,7 +17,7 @@ router.get('/:id',validateObjectId , async (req, res) => {
     res.send(plants);
 }); 
 
-router.put('/', [auth, isAdmin], async (req, res) => {
+router.post('/', [auth, isAdmin], async (req, res) => {
     const plants = new Plant(_.pick(req.body, ['plantName', 'plantShortDescription', 'plantMediumDescription', 'plantDescription', 'plantImage1', 'plantImage2', 'mindegree', 'Temperature', 'Humidity', 'plantCareInstructions']));
     try {
         await plants.save();
@@ -27,7 +27,7 @@ router.put('/', [auth, isAdmin], async (req, res) => {
     }
 });
 
-router.post('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
+router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
     const plant = await Plant.findById(req.params.id);
     if (!plant) return res.status(404).send('The plant with the given ID was not found.');
 

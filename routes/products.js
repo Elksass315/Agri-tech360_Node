@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     res.send(products);
 });
 
-router.put('/', [auth, admin, upload.single('image')] , async (req, res) => {
+router.post('/', [auth, admin, upload.single('image')] , async (req, res) => {
     const product = new Product(_.pick(req.body, ['name', 'price', 'description', 'category']));
     product.image = req.file.path;
     product.seller.userid = req.user;
@@ -26,7 +26,7 @@ router.put('/', [auth, admin, upload.single('image')] , async (req, res) => {
     }
 });
 
-router.post('/:id', [auth,admin,validateObjectId], async (req, res) => {
+router.put('/:id', [auth,admin,validateObjectId], async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).send('The product with the given ID was not found.');
     
@@ -50,7 +50,7 @@ router.delete('/:id', [auth, admin,validateObjectId], async (req, res) => {
     res.send(product);
 });
 
-router.get('/:id', validateObjectId,async (req, res) => {
+router.get('/:id',validateObjectId , async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).send('The product with the given ID was not found.');

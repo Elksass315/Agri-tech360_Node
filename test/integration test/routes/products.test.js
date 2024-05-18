@@ -1,4 +1,5 @@
 const request = require('supertest');
+const mongoose = require('mongoose');
 const Product = require('../../../model/products');
 const User = require('../../../model/users');
 let server
@@ -31,6 +32,7 @@ describe('/api/products', () => {
 
     describe('GET /:id', () => {
         it('should return a product if valid id is passed', async () => {
+            const user = await User.collection.insertOne({ fullName: 'user1', email: 'test1@test1.com', password: '123456', phoneNumber: '+234567890123', isAdmin: true });
             const product = new Product({ name: 'product1', price: 100, description: 'product1 description', category: 'category1', image: 'image1', seller: user._id });
             await product.save();
             const res = await request(server).get('/api/product/' + product._id);
@@ -42,5 +44,13 @@ describe('/api/products', () => {
             const res = await request(server).get('/api/product/1');
             expect(res.status).toBe(404);
         });
+
+        it('should return 404 if no product with the given id exists', async () => {
+            const id = new mongoose.Types.ObjectId();
+            const res = await request(server).get('/api/product/' + id);
+            expect(res.status).toBe(404);
+        });
+
+        
     });
 });
