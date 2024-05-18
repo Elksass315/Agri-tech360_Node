@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
 const admin = require('../middleware/admin');
+const validateObjectId = require('../middleware/validateObjectid');
 
 router.get('/me', auth, async (req, res) => {
     const user = await User.findById(req.user._id).select('-password');
@@ -48,7 +49,7 @@ router.put('update-password', auth, async (req, res) => {
 });
 
 
-router.put('/:id', auth,async (req, res) => {
+router.put('/:id',validateObjectId, auth,async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (req.params.fullname) user.fullName = req.body.fullName;
@@ -64,14 +65,14 @@ router.put('/:id', auth,async (req, res) => {
 
 });
 
-router.delete('/:id', [auth, admin], async (req, res) => {
+router.delete('/:id', [auth, admin,validateObjectId], async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).send('User not found.');
 
     res.send(user);
 });
 
-router.put('/addAdmin/:id', [auth, admin], async (req, res) => {
+router.put('/addAdmin/:id', [auth, admin,validateObjectId], async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).send('User not found.');
 
@@ -85,7 +86,7 @@ router.put('/addAdmin/:id', [auth, admin], async (req, res) => {
     }
 });
 
-router.put('/removeAdmin/:id', [auth, admin], async (req, res) => {
+router.put('/removeAdmin/:id', [auth, admin, validateObjectId], async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).send('User not found.');
 

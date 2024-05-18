@@ -12,6 +12,8 @@ app.get("/", (req, res) => {
 })
 
 const port = 5000 || process.env.PORT;
-app.listen(port, () => {
+server = app.listen(port, () => {
     console.log(`Server start successfully at http://127.0.0.1:${port}`)
 })
+
+module.exports = server;

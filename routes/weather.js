@@ -1,7 +1,6 @@
 const c = require('config');
 const express = require('express');
 const route = express.Router();
-// const fetch = require('node-fetch');
 const config = require('config');
 
 route.get('/',async (req, res) => {
@@ -13,7 +12,7 @@ route.get('/',async (req, res) => {
         return res.status(500);
     }
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${req.body.city}&appid=${config.get('weatherApiKey')}`;
-    console.log(url);
+    
     fetch(url).then(response => response.json()).then(data => {
         res.send(data);
     }).catch(err => {
