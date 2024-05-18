@@ -8,15 +8,15 @@ const validateObjectId = require('../middleware/validateObjectid');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
-router.get('/', async (req, res) => { 
-    
+router.get('/', async (req, res) => {
+
     const products = await Product.find().sort('name');
     res.send(products);
 });
 
-router.post('/', [auth, admin, upload.single('image')] , async (req, res) => {
+router.post('/', [auth, admin, upload.single('image')], async (req, res) => {
     const product = new Product(_.pick(req.body, ['name', 'price', 'description', 'category']));
-    if(req.file) product.image = req.file.path;
+    if (req.file) product.image = req.file.path;
     product.seller.userid = req.user;
     try {
         const result = await product.save();
