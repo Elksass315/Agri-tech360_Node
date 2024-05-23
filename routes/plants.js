@@ -7,15 +7,30 @@ const isAdmin = require('../middleware/admin');
 const validateObjectId = require('../middleware/validateObjectid');
 
 router.get('/', async (req, res) => {
-    const plants = await Plant.find();
-    res.send(plants);
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10;
+
+    const plants = await Plant.find()
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+    const totalItems = await Plant.countDocuments();
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.send({
+        page,
+        limit,
+        totalPages,
+        totalItems,
+        data: plants
+    });
 });
 
-router.get('/:id',validateObjectId , async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
     const plants = await Plant.findById(req.params.id);
     if (!plants) return res.status(404).send('The plant with the given ID was not found.');
     res.send(plants);
-}); 
+});
 
 router.post('/', [auth, isAdmin], async (req, res) => {
     const plants = new Plant(_.pick(req.body, ['plantName', 'plantShortDescription', 'plantMediumDescription', 'plantDescription', 'plantImage1', 'plantImage2', 'mindegree', 'Temperature', 'Humidity', 'plantCareInstructions']));
