@@ -1,3 +1,5 @@
 {
-    "jwtPrivateKey": "Agri-tech360_jwtPrivateKey"
+    "jwtPrivateKey": "Agri-tech360_jwtPrivateKey",
+    "superAdminMail":"SuperAdminMail",
+    "superAdminPass":"SuperAdminPass"
 }
