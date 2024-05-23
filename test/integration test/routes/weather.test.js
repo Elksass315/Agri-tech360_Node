@@ -10,9 +10,7 @@ describe('/api/weather', () => {
             const res = await request(server).get('/api/weather');
             expect(res.status).toBe(400);
         });
-    });
-
-    describe('GET /', () => {
+        
         it('should return weather data', async () => {
             const res = await request(server).get('/api/weather').send({ city: 'Lagos' });
             expect(res.status).toBe(200);
