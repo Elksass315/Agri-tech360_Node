@@ -1,6 +1,6 @@
 {
     "jwtPrivateKey": "unsecureKey",
-    "db": "mongodb://localhost:27017/Agri-tech360",
+    "db": "mongodb://localhost:27017/agri-tech360",
     "port": "3900",
     "weatherApiKey": "811b433c97a562a8ddab4ea2cd22c29d",
     "logFile": "logs/logs.log"

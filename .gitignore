@@ -6,3 +6,4 @@ model/AI-model/sentiment.h5
 model/AI-model/soil_model.h5
 git clone https://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@github.com/Elksass315/Agri-tech360_Node
 logs
+coverage

@@ -9,9 +9,37 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 router.get('/', async (req, res) => {
+    let { page = 1, limit = 10, sort = 'name', order = 'asc', ...filters } = req.query;
 
-    const products = await Product.find().sort('name');
-    res.send(products);
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+    const skip = (page - 1) * limit;
+
+    // Convert filters to MongoDB query object
+    const query = {};
+    for (const key in filters) {
+        if (filters.hasOwnProperty(key)) {
+            query[key] = new RegExp(filters[key], 'i'); // case-insensitive regex search
+        }
+    }
+
+    // Sort options
+    const sortOptions = { [sort]: order === 'asc' ? 1 : -1 };
+
+    const products = await Product.find(query)
+        .skip(skip)
+        .limit(limit)
+        .sort(sortOptions);
+
+    const totalProducts = await Product.countDocuments(query);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    res.json({
+        products,
+        totalProducts,
+        totalPages,
+        currentPage: page
+    });
 });
 
 router.post('/', [auth, admin, upload.single('image')], async (req, res) => {
@@ -26,10 +54,10 @@ router.post('/', [auth, admin, upload.single('image')], async (req, res) => {
     }
 });
 
-router.put('/:id', [auth,admin,validateObjectId], async (req, res) => {
+router.put('/:id', [auth, admin, validateObjectId], async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).send('The product with the given ID was not found.');
-    
+
     if (req.body.name) product.name = req.body.name;
     if (req.body.price) product.price = req.body.price;
     if (req.body.description) product.description = req.body.description;
@@ -44,13 +72,13 @@ router.put('/:id', [auth,admin,validateObjectId], async (req, res) => {
     }
 });
 
-router.delete('/:id', [auth, admin,validateObjectId], async (req, res) => {
+router.delete('/:id', [auth, admin, validateObjectId], async (req, res) => {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).send('The product with the given ID was not found.');
     res.send(product);
 });
 
-router.get('/:id',validateObjectId , async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).send('The product with the given ID was not found.');
