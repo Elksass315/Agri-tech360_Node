@@ -5,7 +5,7 @@ require("./startup/logging")();
 require("./startup/routes")(app);
 require("./startup/DB")();
 require("./startup/config")();
-require("./startup/superadmin")();
+// require("./startup/superadmin")();
 
 
 app.get("/", (req, res) => {
