@@ -1,58 +1,71 @@
-const mongoose = require("mongoose");
+const { Model, DataTypes, Deferrable } = require('sequelize');
+const { sequelize } = require('../startup/DB');
 const config = require("config");
 const jwt = require("jsonwebtoken");
 
-const userSchema = new mongoose.Schema({
-    fullName: {
-        type: String,
-        required: true,
-        minlength: 6,
-        maxlength: 255,
+class User extends Model {
+    static generateAuthToken() {
+        const token = jwt.sign(
+            {
+                _id: this._id,
+                fullName: this.fullName,
+                email: this.email,
+                isAdmin: this.isAdmin
+            },
+            config.get("jwtPrivateKey")
+        );
+        return token;
+    };
+}
 
+User.init({
+    uuid: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true
+    },
+    fullName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        maxlength: 255,
+        minlength: 6,
     },
     email: {
-        type: String,
-        required: true,
-        minlength: 6,
-        maxlength: 255,
-        match: /.+\@.+\..+/,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true,
+        match: /.+\@.+\..+/,
+        maxlength: 255,
+        minlength: 6,
     },
     phoneNumber: {
-        type: String,
-        required: true,
-        minlength: 5,
-        maxlength: 20,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true,
         match: /^\+(?:[0-9] ?){6,14}[0-9]$/,
+        maxlength: 20,
+        minlength: 5,
     },
     password: {
-        type: String,
-        required: true,
-        minlength: 5,
+        type: DataTypes.STRING,
+        allowNull: false,
         maxlength: 1025,
+        minlength: 5,
     },
     isAdmin: {
-        type: Boolean,
-        default: false,
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
     },
+}, {
+    sequelize,
+    modelName: 'User',
+    timestamps: true,
+    underscored: true,
+    freezeTableName: true,
+    tableName: 'User',
+    // options
 });
 
-
-userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign(
-        {
-            _id: this._id,
-            fullName: this.fullName,
-            email: this.email,
-            isAdmin: this.isAdmin
-        },
-        config.get("jwtPrivateKey")
-    );
-    return token;
-};
-
-
-const User = mongoose.model("User", userSchema);
-
+User.sync({ alter: true });
 module.exports = User;
