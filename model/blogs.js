@@ -1,71 +1,61 @@
-const mongoose = require('mongoose');
-const express = require('express');
-const { create } = require('lodash');
-const router = express.Router();
+const { Model, DataTypes, Deferrable } = require('sequelize');
+const { sequelize } = require('../startup/DB');
 
-const BlogSchema = new mongoose.Schema({
+class Blog extends Model { }
+
+Blog.init({
+    uuid: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true
+    },
     title: {
-        type: String,
-        required: true,
-        minlength: 3,
-        maxlength: 255
-    },
-    content: {
-        type: String,
-        required: true,
-        minlength: 5,
-        maxlength: 1000
-    },
-    writer: {
-        userid: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            len: [3, 255]
         }
     },
+    content: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            len: [5, 1000]
+        }
+    },
+    writerUser: {
+        type: DataTypes.UUID,
+        references: {
+            model: 'User',
+            key: 'uuid'
+        },
+        allowNull: false
+    },
     images: {
-        type: [String],
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true
     },
     category: {
-        type: [String],
-        required: true,
-        maxlength: 5,
-        minlength: 1,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: false,
+        validate: {
+            len: [1, 5]
+        }
     },
     likes: {
-        type: Number, default: 0
-    }, likedBy: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-    }]
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false
+    }
+}, {
+    sequelize,
+    modelName: 'Blog',
+    timestamps: true,
+    underscored: true,
+    freezeTableName: true,
+    tableName: 'Blogs',
 });
 
-BlogSchema.methods.like = function (userId) {
-    if (!this.likedBy.includes(userId)) {
-        this.likedBy.push(userId);
-        this.likes += 1;
-        return this.save();
-    }
-    return Promise.resolve(this);
-};
-
-BlogSchema.methods.unlike = function (userId) {
-    const index = this.likedBy.indexOf(userId);
-    if (index !== -1) {
-        this.likedBy.splice(index, 1);
-        this.likes -= 1;
-        return this.save();
-    }
-    return Promise.resolve(this);
-};
-
-BlogSchema.methods.isLiked = function (userId) {
-    return this.likedBy.includes(userId);
-};
-
-const Blog = mongoose.model('Blog', BlogSchema);
-
+Blog.sync({ alter: true})
 module.exports = Blog;

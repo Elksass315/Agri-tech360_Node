@@ -1,31 +1,52 @@
-const mongoose = require("mongoose");
+const { Model, DataTypes, Deferrable } = require('sequelize');
+const { sequelize } = require('../startup/DB');
 
 
-const commentsSchema = new mongoose.Schema({
+class Comment extends Model { }
+
+Comment.init({
+    uuid: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true
+    },
     comment: {
-        type: String,
-        required: true,
-        minlength: 2,
-        maxlength: 1000,
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            len: [2, 1000]
+        }
     },
     commenterUser: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+        type: DataTypes.UUID,
+        references: {
+            model: 'User',
+            key: 'uuid'
+        },
+        allowNull: false
     },
     product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true,
+        type: DataTypes.UUID,
+        references: {
+            model: 'Product',
+            key: 'uuid'
+        }
     },
     prediction: {
-        type: Boolean,
-        default: false, 
-        required: true,
-    },
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    }
+}, {
+    sequelize,
+    modelName: 'Comment',
+    timestamps: true,
+    underscored: true,
+    freezeTableName: true,
+    tableName: 'Comments',
 });
 
-
-const Comment = mongoose.model("Comments", commentsSchema);
+Comment.sync({ alter: true });
 
 exports.Comment = Comment;
