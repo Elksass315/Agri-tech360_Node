@@ -3,9 +3,8 @@ const app = express();
 
 require("./startup/logging")();
 require("./startup/routes")(app);
-require("./startup/DB")();
+require("./startup/DB").startDb();
 require("./startup/config")();
-// require("./startup/superadmin")();
 
 
 app.get("/", (req, res) => {

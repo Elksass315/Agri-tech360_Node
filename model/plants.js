@@ -1,64 +1,80 @@
-const mongoose = require('mongoose');
+const { Model, DataTypes, Deferrable } = require('sequelize');
+const { sequelize } = require('../startup/DB');
+const { model } = require('mongoose');
 
-const plantSchema = new mongoose.Schema({
+class Plant extends Model { }
+
+Plant.init({
+    uuid: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true
+    },
     plantName: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true,
         maxlength: 100,
         minlength: 2,
     },
     plantShortDescription: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         maxlength: 100,
         minlength: 2,
     },
     plantMediumDescription: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         maxlength: 1000,
         minlength: 2,
     },
     plantDescription: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         maxlength: 10000,
         minlength: 2,
     },
     plantImage1: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     plantImage2: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     mindegree: {
-        type: Number,
-        required: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
         max: 100,
-        min:-100,
+        min: -100,
     },
     Temperature: {
-        type: Number,
-        required: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
         max: 100,
-        min:-100,
+        min: -100,
     },
     Humidity: {
-        type: Number,
-        required: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
         max: 100,
-        min:0,
+        min: 0,
     },
     plantCareInstructions: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         maxlength: 10000,
         minlength: 2,
     },
+}, {
+    sequelize,
+    timestamps: true,
+    underscored: true,
+    freezeTableName: true,
+    tableName: 'Plants'
 });
+Plant.sync({ alter: true });
 
-const Plant = mongoose.model('Plant', plantSchema);
 module.exports = Plant
