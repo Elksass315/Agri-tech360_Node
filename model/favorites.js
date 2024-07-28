@@ -5,7 +5,6 @@ const { sequelize } = require('../startup/DB');
 class Favorite extends Model { }
 
 Favorite.init({
-    // Model attributes are defined here
     uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -13,7 +12,11 @@ Favorite.init({
         primaryKey: true
     },
     User: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
+        references: {
+            model: 'User',
+            key: 'uuid'
+        },
         allowNull: false
     },
     product: {
