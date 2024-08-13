@@ -4,10 +4,10 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 
 class User extends Model {
-    static generateAuthToken() {
+    generateAuthToken() {
         const token = jwt.sign(
             {
-                _id: this._id,
+                _id: this.uuid,
                 fullName: this.fullName,
                 email: this.email,
                 isAdmin: this.isAdmin
@@ -28,30 +28,34 @@ User.init({
     fullName: {
         type: DataTypes.STRING,
         allowNull: false,
-        maxlength: 255,
-        minlength: 6,
+        validate: {
+            len: [6, 255]  
+        }
     },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        match: /.+\@.+\..+/,
-        maxlength: 255,
-        minlength: 6,
+        validate: {
+            len: [6, 255],  
+            isEmail: true   
+        }
     },
     phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        match: /^\+(?:[0-9] ?){6,14}[0-9]$/,
-        maxlength: 20,
-        minlength: 5,
+        validate: {
+            len: [5, 20], 
+            is: /^\+(?:[0-9] ?){6,14}[0-9]$/ 
+        }
     },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
-        maxlength: 1025,
-        minlength: 5,
+        validate: {
+            len: [5, 1024]
+        }
     },
     isAdmin: {
         type: DataTypes.BOOLEAN,
@@ -64,7 +68,6 @@ User.init({
     underscored: true,
     freezeTableName: true,
     tableName: 'User',
-    // options
 });
 
 User.sync({ alter: true });

@@ -7,26 +7,28 @@ const _ = require('lodash');
 const admin = require('../middleware/admin');
 const validateObjectId = require('../middleware/validateObjectid');
 
+
 router.get('/me', auth, async (req, res) => {
-    const user = await User.findById(req.user._id).select('-password');
-    res.send(user);
+    const user = await User.findByPk(req.user._id);
+    if (!user) return res.status(404).send('User not found.');    res.send(_.omit(user.toJSON(), 'password'));
 });
 
 router.post('/register', async (req, res) => {
-    let user = await User.findOne({ email: req.body.email });
+    let user = await User.findOne({ where: { email: req.body.email } });
     if (user) {
         return res.status(400).send('User already registered.');
     }
-    user = new User(_.pick(req.body, ['fullName', 'email', 'password', 'phoneNumber']));
+    const userInfo = _.pick(req.body, ['fullName', 'email', 'phoneNumber'])
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
+    userInfo.password = await bcrypt.hash(req.body.password, salt);
+    const newUser = User.build(userInfo);
     try {
-        await user.save();
-        const token = user.generateAuthToken();
-
-        res.header('x-auth-token', token).send(_.pick(user, ['_id', 'fullName', 'email', 'phoneNumber']));
+        await newUser.save();
+        const token = newUser.generateAuthToken();
+        res.header('x-auth-token', token).send(_.pick(newUser, ['uuid', 'fullName', 'email', 'phoneNumber']));
     }
     catch (ex) {
+        
         res.status(400).send(ex.message);
     }
 
