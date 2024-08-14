@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Blog = require('../model/blogs');
 const auth = require('../middleware/auth');
-const validateObjectId = require('../middleware/validateObjectid');
 
 router.get('/', async (req, res) => {
     const { page = 1, limit = 10, category, order = 'desc' } = req.query;
@@ -12,7 +11,7 @@ router.get('/', async (req, res) => {
         query.category = { $in: [category] };
     }
     const sortOrder = order === 'asc' ? 1 : -1;
-    
+
     const blogs = await Blog.find(query)
         .sort({ createdAt: sortOrder })
         .skip((page - 1) * limit)
@@ -27,7 +26,7 @@ router.get('/', async (req, res) => {
     });
 });
 
-router.get('/:id',validateObjectId ,async (req, res) => {
+router.get('/:id', async (req, res) => {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
         return res.status(404).send('Blog not found.');
@@ -53,7 +52,7 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-router.put('/:id', [validateObjectId, auth], async (req, res) => {
+router.put('/:id',auth, async (req, res) => {
     const blog = await Blog.findById(req.params.id);
 
     if (!blog) {
@@ -78,7 +77,7 @@ router.put('/:id', [validateObjectId, auth], async (req, res) => {
 });
 
 
-router.delete('/:id', [validateObjectId, auth], async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
         return res.status(404).send('Blog not found.');
@@ -91,7 +90,7 @@ router.delete('/:id', [validateObjectId, auth], async (req, res) => {
     res.send(blog);
 });
 
-router.put('/like/:id', [validateObjectId, auth], async (req, res) => {
+router.put('/like/:id', auth, async (req, res) => {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
         return res.status(404).send('Blog not found.');
@@ -101,7 +100,7 @@ router.put('/like/:id', [validateObjectId, auth], async (req, res) => {
     res.send(blog);
 });
 
-router.put('/unlike/:id', [validateObjectId, auth], async (req, res) => {
+router.put('/unlike/:id', auth, async (req, res) => {
     const blog = await Blog.findById(req.params.id);
     if (!blog) {
         return res.status(404).send('Blog not found.');

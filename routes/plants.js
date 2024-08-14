@@ -4,7 +4,6 @@ const Plant = require('../model/plants');
 const _ = require('lodash');
 const auth = require('../middleware/auth');
 const isAdmin = require('../middleware/admin');
-const validateObjectId = require('../middleware/validateObjectid');
 
 router.get('/', async (req, res) => {
     const page = parseInt(req.query.page) || 1; 
@@ -26,7 +25,7 @@ router.get('/', async (req, res) => {
     });
 });
 
-router.get('/:id', validateObjectId, async (req, res) => {
+router.get('/:id', async (req, res) => {
     const plants = await Plant.findById(req.params.id);
     if (!plants) return res.status(404).send('The plant with the given ID was not found.');
     res.send(plants);
@@ -42,7 +41,7 @@ router.post('/', [auth, isAdmin], async (req, res) => {
     }
 });
 
-router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
+router.put('/:id', [auth, isAdmin], async (req, res) => {
     const plant = await Plant.findById(req.params.id);
     if (!plant) return res.status(404).send('The plant with the given ID was not found.');
 
@@ -55,7 +54,7 @@ router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
     }
 });
 
-router.delete('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
+router.delete('/:id', [auth, isAdmin], async (req, res) => {
     const plant = await Plant.findByIdAndDelete(req.params.id);
     if (!plant) return res.status(404).send('The plant with the given ID was not found.');
     res.send(plant);

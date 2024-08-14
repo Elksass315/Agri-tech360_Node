@@ -4,7 +4,6 @@ const Product = require('../model/products');
 const _ = require('lodash');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
-const validateObjectId = require('../middleware/validateObjectid');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
@@ -54,7 +53,7 @@ router.post('/', [auth, admin, upload.single('image')], async (req, res) => {
     }
 });
 
-router.put('/:id', [auth, admin, validateObjectId], async (req, res) => {
+router.put('/:id', [auth, admin], async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).send('The product with the given ID was not found.');
 
@@ -72,13 +71,13 @@ router.put('/:id', [auth, admin, validateObjectId], async (req, res) => {
     }
 });
 
-router.delete('/:id', [auth, admin, validateObjectId], async (req, res) => {
+router.delete('/:id', [auth, admin], async (req, res) => {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).send('The product with the given ID was not found.');
     res.send(product);
 });
 
-router.get('/:id', validateObjectId, async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).send('The product with the given ID was not found.');

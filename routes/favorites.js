@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Favorite = require("../model/favorites");
 const auth = require("../middleware/auth");
-const validateObjectId = require("../middleware/validateObjectid");
 
 router.put("/", auth, async (req, res) => {
     const favorite = new Favorite({
@@ -22,7 +21,7 @@ router.get("/", auth, async (req, res) => {
     res.send(favorite);
 });
 
-router.delete("/:id", [auth, validateObjectId] , async (req, res) => {
+router.delete("/:id",auth , async (req, res) => {
     const favorite = await Favorite.findByIdAndDelete(req.params.id);
     if (!favorite) return res.status(404).send("The favorite with the given ID was not found.");
     res.send(favorite);
