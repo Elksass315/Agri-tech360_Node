@@ -5,12 +5,11 @@ const auth = require('../middleware/auth');
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
 const admin = require('../middleware/admin');
-const validateObjectId = require('../middleware/validateObjectid');
-
 
 router.get('/me', auth, async (req, res) => {
     const user = await User.findByPk(req.user._id);
-    if (!user) return res.status(404).send('User not found.');    res.send(_.omit(user.toJSON(), 'password'));
+    if (user === null) return res.status(404).send('User not found.');
+    res.send(_.omit(user.toJSON(), 'password'));
 });
 
 router.post('/register', async (req, res) => {
@@ -28,15 +27,15 @@ router.post('/register', async (req, res) => {
         res.header('x-auth-token', token).send(_.pick(newUser, ['uuid', 'fullName', 'email', 'phoneNumber']));
     }
     catch (ex) {
-        
         res.status(400).send(ex.message);
     }
 
 });
 
 
-router.put('update-password', auth, async (req, res) => {
-    const user = await User.findById(req.user._id);
+router.put('/update_password', auth, async (req, res) => {
+    const user = await User.findByPk(req.user._id);
+    if (!user) return res.status(404).send('User not found.');
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(req.body.password, salt);
@@ -51,15 +50,17 @@ router.put('update-password', auth, async (req, res) => {
 });
 
 
-router.put('/:id',validateObjectId, auth,async (req, res) => {
-    const user = await User.findById(req.params.id);
+router.put('/:id', auth, async (req, res) => {
+    const user = await User.findByPk(req.user._id);
+    if (!user) return res.status(404).send('User not found.');
 
-    if (req.params.fullname) user.fullName = req.body.fullName;
-    if (req.params.phoneNumber) user.phoneNumber = req.body.phoneNumber;
+    if (req.body.fullName) user.fullName = req.body.fullName;
+    if (req.body.email) user.email = req.body.email;
+    if (req.body.phoneNumber) user.phoneNumber = req.body.phoneNumber;
 
     try {
         await user.save();
-        res.send(user);
+        res.send(_.pick(user, ['uuid', 'fullName', 'email', 'phoneNumber']));
     }
     catch (ex) {
         res.status(500).send(ex.message);
@@ -67,39 +68,41 @@ router.put('/:id',validateObjectId, auth,async (req, res) => {
 
 });
 
-router.delete('/:id', [auth, admin,validateObjectId], async (req, res) => {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).send('User not found.');
 
-    res.send(user);
+router.delete('/:id', [auth, admin], async (req, res) => {
+    const user = await User.destroy({ where: { uuid: req.params.id } });
+    
+    if (user === 0) return res.status(404).send('User not found.');
+    res.send('User deleted successfully.');
 });
 
-router.put('/addAdmin/:id', [auth, admin,validateObjectId], async (req, res) => {
-    const user = await User.findById(req.params.id);
+
+router.put('/addAdmin/:id', [auth, admin], async (req, res) => {
+    const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).send('User not found.');
 
     user.isAdmin = true;
     try {
         await user.save();
-        res.send(user);
+        res.send(_.pick(user, ['uuid', 'fullName', 'email', 'phoneNumber', 'isAdmin']));
     }
     catch (ex) {
         res.status(500).send(ex.message);
     }
 });
 
-router.put('/removeAdmin/:id', [auth, admin, validateObjectId], async (req, res) => {
-    const user = await User.findById(req.params.id);
+router.put('/removeAdmin/:id', [auth, admin], async (req, res) => {
+    const user = await User.findByPk(req.params.id);
     if (!user) return res.status(404).send('User not found.');
 
     user.isAdmin = false;
     try {
         await user.save();
-        res.send(user);
+        res.send(_.pick(user, ['uuid', 'fullName', 'email', 'phoneNumber', 'isAdmin']));
     }
     catch (ex) {
         res.status(500).send(ex.message);
-    }   
+    }
 });
 
 module.exports = router;
