@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
 const config = require("config");
 const winston = require("winston");
-const { model } = require('mongoose');
 const logging = require('./logging');
 const sequelize = new Sequelize(config.get("db"), config.get("dbUser"), config.get("dbPass"), {
     host: 'localhost',

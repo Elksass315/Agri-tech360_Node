@@ -1,6 +1,5 @@
 const { Model, DataTypes, Deferrable } = require('sequelize');
 const { sequelize } = require('../startup/DB');
-const { model } = require('mongoose');
 
 class Plant extends Model { }
 
