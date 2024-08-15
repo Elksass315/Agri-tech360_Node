@@ -5,6 +5,8 @@ const _ = require('lodash');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const multer = require('multer');
+const { Op } = require('sequelize');
+const Product = require('../model/products');
 const upload = multer({ dest: 'uploads/' });
 
 router.get('/', async (req, res) => {
@@ -12,79 +14,102 @@ router.get('/', async (req, res) => {
 
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
-    const skip = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-    // Convert filters to MongoDB query object
-    const query = {};
+    const where = {};
     for (const key in filters) {
         if (filters.hasOwnProperty(key)) {
-            query[key] = new RegExp(filters[key], 'i'); // case-insensitive regex search
+            where[key] = { [Op.iLike]: `%${filters[key]}%` };
         }
     }
 
-    // Sort options
-    const sortOptions = { [sort]: order === 'asc' ? 1 : -1 };
+    const orderOptions = [[sort, order.toUpperCase()]];
 
-    const products = await Product.find(query)
-        .skip(skip)
-        .limit(limit)
-        .sort(sortOptions);
+    try {
+        const { rows: products, count: totalProducts } = await Product.findAndCountAll({
+            where,
+            order: orderOptions,
+            limit,
+            offset
+        });
 
-    const totalProducts = await Product.countDocuments(query);
-    const totalPages = Math.ceil(totalProducts / limit);
+        const totalPages = Math.ceil(totalProducts / limit);
 
-    res.json({
-        products,
-        totalProducts,
-        totalPages,
-        currentPage: page
-    });
+        res.json({
+            products,
+            totalProducts,
+            totalPages,
+            currentPage: page
+        });
+    } catch (error) {
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 router.post('/', [auth, admin, upload.single('image')], async (req, res) => {
-    const product = new Product(_.pick(req.body, ['name', 'price', 'description', 'category']));
-    if (req.file) product.image = req.file.path;
-    product.seller.userid = req.user;
     try {
-        const result = await product.save();
-        res.send(result);
-    } catch (ex) {
-        res.status(400).send(ex.message);
+        const product = await Product.create({
+            name: req.body.name,
+            price: req.body.price,
+            description: req.body.description,
+            category: req.body.category,
+            image: req.file ? req.file.path : null,
+            'seller.userid': req.user
+        });
+
+        res.send(product.toJSON());
+    } catch (error) {
+        res.status(400).send(error.message);
     }
 });
 
 router.put('/:id', [auth, admin], async (req, res) => {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).send('The product with the given ID was not found.');
-
-    if (req.body.name) product.name = req.body.name;
-    if (req.body.price) product.price = req.body.price;
-    if (req.body.description) product.description = req.body.description;
-    if (req.body.category) product.category = req.body.category;
-    if (req.body.seller && req.body.seller.userid) product.seller.userid = req.body.seller.userid;
-
     try {
-        const result = await product.save();
-        res.send(result);
-    } catch (ex) {
-        res.status(400).send(ex.message);
+        const product = await Product.findByPk(req.params.id);
+        if (!product) return res.status(404).send('The product with the given ID was not found.');
+
+        const updatedProduct = {
+            name: req.body.name || product.name,
+            price: req.body.price || product.price,
+            description: req.body.description || product.description,
+            category: req.body.category || product.category,
+            'seller.userid': req.body.seller && req.body.seller.userid ? req.body.seller.userid : product.seller.userid
+        };
+
+        await Product.update(updatedProduct, {
+            where: { id: req.params.id }
+        });
+
+        res.send(updatedProduct);
+    } catch (error) {
+        res.status(400).send(error.message);
     }
 });
 
 router.delete('/:id', [auth, admin], async (req, res) => {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).send('The product with the given ID was not found.');
-    res.send(product);
+    try {
+        const product = await Product.findByPk(req.params.id);
+        if (!product) return res.status(404).send('The product with the given ID was not found.');
+
+        await Product.destroy({
+            where: { id: req.params.id }
+        });
+
+        res.send(product);
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
 });
 
 router.get('/:id', async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findByPk(req.params.id);
         if (!product) return res.status(404).send('The product with the given ID was not found.');
         res.send(product);
     } catch (error) {
         return res.status(404).send('The product with the given ID was not found.');
     }
 });
+
 
 module.exports = router;
