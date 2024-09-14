@@ -9,11 +9,15 @@ const blog = require("../routes/blogs");
 // TODO: Waiting for https://github.com/tensorflowyg/tfjs/issues/8261 to Fix the tf issue
 //const AI = require("./routes/AI")
 const errorMiddleware = require("../middleware/error");
+const swaggerDocs = require("../startup/swagger"); const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 
+const swaggerDocument = YAML.load('./swagger.yaml');
 
 module.exports = function (app) {
     app.use(express.json());
     app.use(express.static('./uploads'));
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
     app.use("/api/users", users)
     app.use("/api/auth", auth)

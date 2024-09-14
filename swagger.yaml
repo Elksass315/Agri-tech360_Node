@@ -1,0 +1,590 @@
+openapi: 3.0.0
+info:
+  title:  Agri-tech360 API Documentation
+  version: 1.0.0
+  description: API documentation for Agri-tech360.
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /blogs:
+    get:
+      summary: Get a list of blogs
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit of blogs per page
+          required: false
+          schema:
+            type: integer
+        - name: category
+          in: query
+          description: Category filter
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Order of the blogs (asc/desc)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of blogs
+
+    post:
+      summary: Create a new blog
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                category:
+                  type: string
+      responses:
+        '201':
+          description: Blog created
+
+  /blogs/{id}:
+    get:
+      summary: Get a blog by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blog data
+        '404':
+          description: Blog not found
+
+    put:
+      summary: Update a blog by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                category:
+                  type: string
+      responses:
+        '200':
+          description: Blog updated
+
+    delete:
+      summary: Delete a blog by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blog deleted
+        '404':
+          description: Blog not found
+
+  /users/me:
+    get:
+      summary: Get current logged-in user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile data
+
+  /users/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                phoneNumber:
+                  type: string
+      responses:
+        '201':
+          description: User registered
+
+  /users/{id}:
+    put:
+      summary: Update user details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                phoneNumber:
+                  type: string
+      responses:
+        '200':
+          description: User updated
+
+    delete:
+      summary: Delete a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted
+
+  /favorites:
+    get:
+      summary: Get all favorite items of the current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of favorites
+
+    put:
+      summary: Add a new favorite item
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product:
+                  type: string
+      responses:
+        '200':
+          description: Favorite added
+
+  /favorites/{id}:
+    delete:
+      summary: Remove a favorite by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Favorite removed
+  /blogs:
+    get:
+      summary: Get a list of blogs
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit of blogs per page
+          required: false
+          schema:
+            type: integer
+        - name: category
+          in: query
+          description: Category filter
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Order of the blogs (asc/desc)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of blogs
+
+    post:
+      summary: Create a new blog
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                category:
+                  type: string
+      responses:
+        '201':
+          description: Blog created
+
+  /users:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User logged in and token returned
+        '400':
+          description: Invalid email or password
+
+  /plants:
+    get:
+      summary: Get a list of plants with pagination
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Limit of plants per page
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of plants
+
+    post:
+      summary: Create a new plant
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plantName:
+                  type: string
+                plantShortDescription:
+                  type: string
+                plantMediumDescription:
+                  type: string
+                plantDescription:
+                  type: string
+                plantImage1:
+                  type: string
+                plantImage2:
+                  type: string
+                mindegree:
+                  type: integer
+                Temperature:
+                  type: string
+                Humidity:
+                  type: string
+                plantCareInstructions:
+                  type: string
+      responses:
+        '201':
+          description: Plant created
+
+  /plants/{id}:
+    get:
+      summary: Get a plant by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plant data
+        '404':
+          description: Plant not found
+
+    put:
+      summary: Update a plant by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plantName:
+                  type: string
+                plantShortDescription:
+                  type: string
+                plantMediumDescription:
+                  type: string
+                plantDescription:
+                  type: string
+                plantImage1:
+                  type: string
+                plantImage2:
+                  type: string
+                mindegree:
+                  type: integer
+                Temperature:
+                  type: string
+                Humidity:
+                  type: string
+                plantCareInstructions:
+                  type: string
+      responses:
+        '200':
+          description: Plant updated
+
+    delete:
+      summary: Delete a plant by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plant deleted
+        '404':
+          description: Plant not found
+
+  /products:
+    get:
+      summary: Get a list of products with filters
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          description: Sort field
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Sort order (asc/desc)
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of products
+
+    post:
+      summary: Create a new product
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+                description:
+                  type: string
+                category:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Product created
+
+  /products/{id}:
+    get:
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product data
+        '404':
+          description: Product not found
+
+    put:
+      summary: Update a product by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+                description:
+                  type: string
+                category:
+                  type: string
+                seller:
+                  type: object
+                  properties:
+                    userid:
+                      type: string
+      responses:
+        '200':
+          description: Product updated
+
+    delete:
+      summary: Delete a product by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product deleted
+        '404':
+          description: Product not found
+
+  /weather:
+    get:
+      summary: Get weather information for a city
+      parameters:
+        - name: city
+          in: query
+          description: City name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Weather information
+        '400':
+          description: City is required
+        '500':
+          description: Server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
